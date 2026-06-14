@@ -1,0 +1,6 @@
+{
+  "name": "CareerOS",
+  "description": "A unified platform where learning and hiring live in the same ecosystem. Course upskilling translates into verified portfolio proof, granting recruiters instant visibility into candidate growth.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
