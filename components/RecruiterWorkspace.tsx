@@ -20,6 +20,7 @@ import {
   X 
 } from 'lucide-react';
 import { Candidate, Course, Job, CourseRequest } from '@/lib/types';
+import { SKILL_TREES, getPathConnections, renderSkillIcon } from './CandidateWorkspace';
 
 interface RecruiterWorkspaceProps {
   candidates: Candidate[];
@@ -808,6 +809,7 @@ export default function RecruiterWorkspace({
               {assessAgainstJob && (
                 (() => {
                   const { matching, lacking, jobTitle } = getVennAnalysis(focusedCandidate, assessAgainstJob);
+                  const job = jobs.find(j => j.id === assessAgainstJob);
                   const total = matching.length + lacking.length;
                   const percent = total > 0 ? Math.round((matching.length / total) * 100) : 100;
 
@@ -883,6 +885,150 @@ export default function RecruiterWorkspace({
                           )}
                         </div>
                       </div>
+
+                      {/* Visual Skill Match Tree Overlay */}
+                      {job && (
+                        (() => {
+                          let activeTreePath: 'Full-Stack' | 'AI Specialist' | 'Product Designer' | 'Product Manager' = 'Full-Stack';
+                          const needed = job.skillsNeeded;
+                          if (needed.some(s => ['Gemini API', 'AI Engineering', 'Large Language Models', 'Prompt Engineering'].includes(s))) {
+                            activeTreePath = 'AI Specialist';
+                          } else if (needed.some(s => ['Typography', 'UI/UX', 'Figma', 'Design Systems'].includes(s))) {
+                            activeTreePath = 'Product Designer';
+                          } else if (needed.some(s => ['A/B Testing', 'User Retention', 'Funnel Analytics', 'PLG'].includes(s))) {
+                            activeTreePath = 'Product Manager';
+                          }
+
+                          return (
+                            <div className="space-y-2 pt-4 border-t border-slate-100">
+                              <span className="text-[10px] text-slate-400 font-mono font-bold uppercase block">Visual Competency Graph Comparison ({SKILL_TREES[activeTreePath].title})</span>
+                              
+                              <div className="relative border border-slate-200 rounded-xl bg-slate-950 p-2 overflow-hidden select-none" style={{ height: '220px' }}>
+                                {/* Radial dots grid */}
+                                <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ 
+                                  backgroundImage: 'radial-gradient(circle, #818cf8 1px, transparent 1px)', 
+                                  backgroundSize: '12px 12px' 
+                                }} />
+
+                                {/* SVG connectors */}
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                                  <defs>
+                                    <linearGradient id="recruiter-glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                      <stop offset="0%" stopColor="#10b981" />
+                                      <stop offset="100%" stopColor="#6366f1" />
+                                    </linearGradient>
+                                  </defs>
+                                  {(() => {
+                                    const nodes = SKILL_TREES[activeTreePath].nodes;
+                                    const connections = getPathConnections(activeTreePath);
+
+                                    return connections.map((conn, idx) => {
+                                      const fromNode = nodes.find(n => n.name === conn.from);
+                                      const toNode = nodes.find(n => n.name === conn.to);
+
+                                      if (!fromNode || !toNode) return null;
+
+                                      // Scale coordinates to fit Recruiter card height [0..220]
+                                      const scaleX = (x: number) => 35 + (x / 760) * 540;
+                                      const scaleY = (y: number) => 25 + (y / 350) * 150;
+
+                                      const startX = scaleX(fromNode.x);
+                                      const startY = scaleY(fromNode.y);
+                                      const endX = scaleX(toNode.x);
+                                      const endY = scaleY(toNode.y);
+
+                                      const d = `M ${startX} ${startY} C ${(startX + endX) / 2} ${startY}, ${(startX + endX) / 2} ${endY}, ${endX} ${endY}`;
+
+                                      const fromUnlocked = focusedCandidate.skills.includes(fromNode.name);
+                                      const toUnlocked = focusedCandidate.skills.includes(toNode.name);
+
+                                      let strokeColor = '#1e293b';
+                                      let strokeDash = undefined;
+                                      let strokeWidth = 1.5;
+
+                                      if (fromUnlocked && toUnlocked) {
+                                        strokeColor = 'url(#recruiter-glow-grad)';
+                                        strokeWidth = 2.5;
+                                      } else if (fromUnlocked) {
+                                        strokeColor = '#475569';
+                                        strokeDash = '3,3';
+                                      }
+
+                                      return (
+                                        <path 
+                                          key={idx}
+                                          d={d}
+                                          fill="none"
+                                          stroke={strokeColor}
+                                          strokeWidth={strokeWidth}
+                                          strokeDasharray={strokeDash}
+                                        />
+                                      );
+                                    });
+                                  })()}
+                                </svg>
+
+                                {/* Nodes */}
+                                <div className="absolute inset-0">
+                                  {SKILL_TREES[activeTreePath].nodes.map(node => {
+                                    const isRequired = job.skillsNeeded.includes(node.name);
+                                    const isUnlocked = focusedCandidate.skills.includes(node.name);
+                                    const mastery = isUnlocked ? (focusedCandidate.skillLevels?.[node.name] || 'Intermediate') : 'Locked';
+
+                                    // Scale coordinates
+                                    const scaleX = (x: number) => 35 + (x / 760) * 540;
+                                    const scaleY = (y: number) => 25 + (y / 350) * 150;
+
+                                    const nodeStyle = {
+                                      position: 'absolute' as const,
+                                      left: `${scaleX(node.x)}px`,
+                                      top: `${scaleY(node.y)}px`,
+                                      transform: 'translate(-50%, -50%)',
+                                      zIndex: 10
+                                    };
+
+                                    let nodeClass = '';
+                                    if (isRequired) {
+                                      if (isUnlocked) {
+                                        nodeClass = 'bg-emerald-950 border border-emerald-500 text-emerald-400 ring-2 ring-emerald-400/20';
+                                      } else {
+                                        nodeClass = 'bg-rose-950 border border-dashed border-rose-500 text-rose-450';
+                                      }
+                                    } else {
+                                      if (isUnlocked) {
+                                        nodeClass = 'bg-slate-900 border border-slate-700 text-slate-400';
+                                      } else {
+                                        nodeClass = 'bg-slate-950 border border-slate-800 text-slate-800';
+                                      }
+                                    }
+
+                                    return (
+                                      <div 
+                                        key={node.name}
+                                        style={nodeStyle}
+                                        className={`w-9 h-9 rounded-xl flex items-center justify-center relative transition-all group ${nodeClass}`}
+                                        title={`${node.name}: ${isUnlocked ? `Verified ${mastery}` : isRequired ? 'Deficit (Required)' : 'Locked'}`}
+                                      >
+                                        <div className="scale-75 text-inherit">
+                                          {renderSkillIcon(node.name)}
+                                        </div>
+
+                                        {/* Tooltip on hover */}
+                                        <div className="absolute opacity-0 group-hover:opacity-100 bg-slate-900 border border-slate-800 p-2 rounded shadow-2xl text-[10px] text-white pointer-events-none transition-all w-36 text-center z-50" style={{ bottom: '40px', left: '50%', transform: 'translateX(-50%)' }}>
+                                          <p className="font-bold">{node.name}</p>
+                                          <p className="mt-0.5 text-slate-400">
+                                            {isUnlocked ? `Verified Mastery: ${mastery}` : isRequired ? 'Deficit Required' : 'Locked'}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()
+                      )}
                     </div>
                   );
                 })()

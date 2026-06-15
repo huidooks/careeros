@@ -219,10 +219,49 @@ export default function Home() {
         const updatedCourseIds = Array.from(new Set([...cand.completedCourseIds, courseId]));
         const updatedSkills = Array.from(new Set([...cand.skills, ...completedCourse.skillsGranted]));
         
+        // Add default Intermediate level for completed courses
+        const currentLevels = cand.skillLevels || {};
+        const updatedLevels = { ...currentLevels };
+        completedCourse.skillsGranted.forEach(skill => {
+          if (updatedLevels[skill] !== 'Pro') {
+            updatedLevels[skill] = 'Intermediate';
+          }
+        });
+
         return {
           ...cand,
           completedCourseIds: updatedCourseIds,
-          skills: updatedSkills
+          skills: updatedSkills,
+          skillLevels: updatedLevels
+        };
+      }
+      return cand;
+    }));
+  };
+
+  const handleUpdateTargetJob = (jobId: string | undefined) => {
+    setCandidates(prevCands => prevCands.map(cand => {
+      if (cand.isCurrentUser) {
+        return {
+          ...cand,
+          targetJobId: jobId
+        };
+      }
+      return cand;
+    }));
+  };
+
+  const handleUpdateSkillLevel = (skillName: string, newLevel: 'Beginner' | 'Intermediate' | 'Pro') => {
+    setCandidates(prevCands => prevCands.map(cand => {
+      if (cand.isCurrentUser) {
+        const levels = cand.skillLevels || {};
+        return {
+          ...cand,
+          skillLevels: {
+            ...levels,
+            [skillName]: newLevel
+          },
+          skills: Array.from(new Set([...cand.skills, skillName]))
         };
       }
       return cand;
@@ -237,9 +276,20 @@ export default function Home() {
 
     setCandidates(prevCands => prevCands.map(cand => {
       if (cand.isCurrentUser) {
+        // Automatically mark project skills as Beginner if not present
+        const currentLevels = cand.skillLevels || {};
+        const updatedLevels = { ...currentLevels };
+        newProjectData.skills.forEach(skill => {
+          if (!updatedLevels[skill]) {
+            updatedLevels[skill] = 'Beginner';
+          }
+        });
+
         return {
           ...cand,
-          projects: [...cand.projects, freshProject]
+          projects: [...cand.projects, freshProject],
+          skills: Array.from(new Set([...cand.skills, ...newProjectData.skills])),
+          skillLevels: updatedLevels
         };
       }
       return cand;
@@ -543,6 +593,8 @@ Key Requirements:
             onApplyJob={handleApplyJob}
             onUpdateStatus={handleUpdateStatus}
             appliedJobIds={appliedJobIds}
+            onUpdateTargetJob={handleUpdateTargetJob}
+            onUpdateSkillLevel={handleUpdateSkillLevel}
           />
         )}
 

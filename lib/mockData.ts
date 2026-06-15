@@ -218,6 +218,7 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     email: 'alex.carter@example.com',
     completedCourseIds: [],
     skills: [],
+    skillLevels: { 'React': 'Beginner', 'TypeScript': 'Beginner' },
     projects: [
       {
         id: 'user-p1',
@@ -239,6 +240,12 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     email: 'meera.patel@example.com',
     completedCourseIds: ['course-2'],
     skills: ['Gemini API', 'AI Engineering', 'Prompt Engineering', 'Large Language Models'],
+    skillLevels: {
+      'Gemini API': 'Intermediate',
+      'AI Engineering': 'Pro',
+      'Prompt Engineering': 'Intermediate',
+      'Large Language Models': 'Pro'
+    },
     projects: [
       {
         id: 'p1-1',
@@ -258,6 +265,16 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     email: 'marcus.v@example.com',
     completedCourseIds: ['course-3', 'course-1'],
     skills: ['Design Systems', 'Figma', 'UI/UX', 'Typography', 'Next.js', 'React', 'Server Actions', 'SSR'],
+    skillLevels: {
+      'Design Systems': 'Pro',
+      'Figma': 'Intermediate',
+      'UI/UX': 'Intermediate',
+      'Typography': 'Beginner',
+      'Next.js': 'Intermediate',
+      'React': 'Pro',
+      'Server Actions': 'Intermediate',
+      'SSR': 'Beginner'
+    },
     projects: [
       {
         id: 'p2-1',
@@ -277,6 +294,12 @@ export const INITIAL_CANDIDATES: Candidate[] = [
     email: 'sjenkins@example.com',
     completedCourseIds: ['course-4'],
     skills: ['PLG', 'Funnel Analytics', 'User Retention', 'A/B Testing'],
+    skillLevels: {
+      'PLG': 'Pro',
+      'Funnel Analytics': 'Intermediate',
+      'User Retention': 'Intermediate',
+      'A/B Testing': 'Beginner'
+    },
     projects: [],
     status: 'Open for Offers'
   }
