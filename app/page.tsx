@@ -1112,6 +1112,19 @@ Key Requirements:
           )}
         </nav>
       </div>
+
+      {/* Hide Next.js dev portal on mobile screens to prevent blocking bottom nav clicks */}
+      <style>{`
+        @media (max-width: 767px) {
+          nextjs-portal,
+          #__next-prerender-indicator,
+          [data-nextjs-dialog-overlay] {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

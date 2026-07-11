@@ -62,37 +62,33 @@ export default function Header({
         {/* Persona Switch Switcher & Logout */}
         <div className="flex items-center space-x-3" id="header-actions">
           <div className="hidden md:flex items-center space-x-1 bg-slate-100 p-0.5 rounded-lg" id="persona-switcher">
-            {userRole !== 'recruiter' && (
-              <button
-                id="switch-btn-candidate"
-                onClick={() => setPersona('candidate')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 ${
-                  currentPersona === 'candidate'
-                    ? 'bg-white text-indigo-600 shadow-sm shadow-slate-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Candidate View</span>
-                <span className="sm:hidden">Candidate</span>
-              </button>
-            )}
+            <button
+              id="switch-btn-candidate"
+              onClick={() => setPersona('candidate')}
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 ${
+                currentPersona === 'candidate'
+                  ? 'bg-white text-indigo-600 shadow-sm shadow-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Candidate View</span>
+              <span className="sm:hidden">Candidate</span>
+            </button>
             
-            {userRole !== 'candidate' && (
-              <button
-                id="switch-btn-recruiter"
-                onClick={() => setPersona('recruiter')}
-                className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 ${
-                  currentPersona === 'recruiter'
-                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Recruiter View</span>
-                <span className="sm:hidden">Recruiter</span>
-              </button>
-            )}
+            <button
+              id="switch-btn-recruiter"
+              onClick={() => setPersona('recruiter')}
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all duration-200 ${
+                currentPersona === 'recruiter'
+                  ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Recruiter View</span>
+              <span className="sm:hidden">Recruiter</span>
+            </button>
           </div>
 
           {userName && (
